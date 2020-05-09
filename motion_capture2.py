@@ -30,8 +30,14 @@ while True:
     print("Motion detected!" + str(num))
     num += 1
     time.sleep(2)
-    img_name = str(datetime.now()) + ".jpg"
+
+    img_name = str(datetime.now())
     img_name = img_name.replace(" ", "-")
+    img_name = img_name.replace(":", "-")
+    img_name = img_name.replace(".", "-")
+
+    img_name += ".jpg"
+
     camera.capture(out_path + img_name)
     print("Captured: {}".format(img_name))
     print("Sending image to recognize_faces_image.py...")
@@ -70,4 +76,3 @@ while True:
     time.sleep(10)
 
 print("END")
-
