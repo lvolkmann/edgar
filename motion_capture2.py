@@ -3,10 +3,12 @@ from picamera import PiCamera
 import time
 from datetime import datetime
 from fractions import Fraction
-import smtplib, ssl
+import smtplib
+import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
+import config
 
 print("BEGIN")
 
@@ -26,21 +28,22 @@ while True:
     print("Starting motion detection...")
     pir.wait_for_motion()
     print("Motion detected!" + str(num))
-    num+= 1
+    num += 1
     time.sleep(2)
     img_name = str(datetime.now()) + ".jpg"
     img_name = img_name.replace(" ", "-")
-    camera.capture(out_path + img_name )
+    camera.capture(out_path + img_name)
     print("Captured: {}".format(img_name))
     print("Sending image to recognize_faces_image.py...")
-    CLICommand = 'python /home/pi/Development/edgar/face-recognition-opencv/recognize_faces_image2.py --encodings /home/pi/Development/edgar/face-recognition-opencv/encodings.pickle --image "/home/pi/Development/edgar/motion_captures/{imgName}" --detection-method hog'.format(imgName = img_name)
+    CLICommand = 'python /home/pi/Development/edgar/face-recognition-opencv/recognize_faces_image2.py --encodings /home/pi/Development/edgar/face-recognition-opencv/encodings.pickle --image "/home/pi/Development/edgar/motion_captures/{imgName}" --detection-method hog'.format(
+        imgName=img_name)
     f = os.popen(CLICommand)
     names = f.read()
-    
-    ###Sending Email Notification
-    sender_email = ""
-    receiver_email = ""
-    password = ""
+
+    # Sending Email Notification
+    sender_email = config.sender_email
+    receiver_email = config.receiver_email
+    password = config.password
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "Person Detected"
@@ -61,11 +64,10 @@ while True:
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, message.as_string())
-        
+
     print("names returned: ")
     print(names)
     time.sleep(10)
 
 print("END")
-
 
